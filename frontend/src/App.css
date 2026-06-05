@@ -1,0 +1,6 @@
+/* Tailwind CSS handles all styling */
+@media print {
+  body {
+    background-color: white;
+  }
+}

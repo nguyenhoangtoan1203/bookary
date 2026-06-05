@@ -1,0 +1,87 @@
+name: CI Build
+
+on:
+  push:
+    branches: [ main, develop, master ]
+  pull_request:
+    branches: [ main, develop, master ]
+
+jobs:
+  backend-build:
+    name: Backend Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [24.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        # cache: 'npm' 
+        
+    - name: Install backend dependencies
+      working-directory: ./backend
+      run: npm install
+
+    - name: Generate Prisma Client
+      working-directory: ./backend
+      run: npx prisma generate
+
+    - name: Build backend
+      working-directory: ./backend
+      run: npm run build
+
+    - name: Check build output
+      working-directory: ./backend
+      run: ls -la dist/
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [24.x]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        # cache: 'npm'
+
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm install
+
+    - name: Build frontend
+      working-directory: ./frontend
+      run: npm run build
+
+    - name: Check build output
+      working-directory: ./frontend
+      run: ls -la dist/
+
+  ci-status:
+    name: CI Status
+    runs-on: ubuntu-latest
+    needs: [backend-build, frontend-build]
+    if: always()
+
+    steps:
+    - name: Check build status
+      run: |
+        if [ "${{ needs.backend-build.result }}" = "failure" ] || [ "${{ needs.frontend-build.result }}" = "failure" ]; then
+          echo "❌ Build failed!"
+          exit 1
+        else
+          echo "✅ All builds passed!"
+          exit 0
+        fi

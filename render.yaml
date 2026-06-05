@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: bookary-backend
+    env: node
+    region: oregon
+    plan: free
+    branch: main
+    dir: ./backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        value: file:./prisma/prod.db
+      - key: PORT
+        value: 10000
+
+  - type: static_site
+    name: bookary-frontend
+    region: oregon
+    branch: main
+    dir: ./frontend
+    buildCommand: npm install && npm run build
+    publishDirectory: dist
+    routes:
+      - path: /*
+        destination: /index.html
+        action: rewrite
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://bookary-backend.onrender.com/api

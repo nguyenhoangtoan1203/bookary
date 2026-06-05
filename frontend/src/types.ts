@@ -1,0 +1,66 @@
+export interface User {
+  id: number;
+  email: string;
+  name: string;
+  role: 'ADMIN' | 'GUEST';
+}
+
+export interface LoginResponse {
+  token: string;
+  user: User;
+}
+
+export interface Book {
+  id: number;
+  code: string;
+  title: string;
+  author: string;
+  totalQuantity: number;
+  availableQty: number;
+  maintenanceQty: number;
+  lostQty: number;
+  createdAt: string;
+}
+
+export interface Reader {
+  id: number;
+  code: string;
+  name: string;
+  email: string;
+  phone: string;
+  membershipExpiry: string;
+  createdAt: string;
+}
+
+export interface BorrowTicket {
+  id: number;
+  ticketCode: string;
+  readerId: number;
+  bookId: number;
+  borrowedAt: string;
+  dueDate: string;
+  returnedAt: string | null;
+  isLost: boolean;
+  status: 'BORROWING' | 'RETURNED' | 'LOST';
+  reader?: Reader;
+  book?: Book;
+  daysOverdue?: number;
+  estimatedFine?: number;
+  isOverdue?: boolean;
+}
+
+export interface DashboardStats {
+  totalBooks: number;
+  totalReaders: number;
+  borrowing: number;
+  overdue: number;
+}
+
+export interface PaginatedResponse<T> {
+  total: number;
+  pages: number;
+  currentPage: number;
+  books?: T[];
+  readers?: T[];
+  [key: string]: any;
+}

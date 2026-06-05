@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  password  String
+  role      Role    @default(GUEST)
+  name      String
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  GUEST
+}
+
+model Book {
+  id                Int            @id @default(autoincrement())
+  code              String         @unique
+  title             String
+  author            String
+  totalQuantity     Int
+  availableQty      Int
+  maintenanceQty    Int            @default(0)
+  lostQty           Int            @default(0)
+  createdAt         DateTime       @default(now())
+  tickets           BorrowTicket[]
+}
+
+model Reader {
+  id               Int            @id @default(autoincrement())
+  code             String         @unique
+  name             String
+  email            String         @unique
+  phone            String
+  membershipExpiry DateTime
+  createdAt        DateTime       @default(now())
+  tickets          BorrowTicket[]
+}
+
+model BorrowTicket {
+  id          Int           @id @default(autoincrement())
+  ticketCode  String        @unique
+  readerId    Int
+  bookId      Int
+  borrowedAt  DateTime      @default(now())
+  dueDate     DateTime
+  returnedAt  DateTime?
+  isLost      Boolean       @default(false)
+  status      TicketStatus  @default(BORROWING)
+  reader      Reader        @relation(fields: [readerId], references: [id], onDelete: Cascade)
+  book        Book          @relation(fields: [bookId], references: [id], onDelete: Cascade)
+}
+
+enum TicketStatus {
+  BORROWING
+  RETURNED
+  LOST
+}
